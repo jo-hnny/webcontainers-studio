@@ -2,8 +2,8 @@ import { Col, Layout, Row } from 'antd';
 import { useState } from 'react';
 import { BrowserPanel } from './BrowserPanel';
 import { CodeEditor } from './CodeEditor';
-import { TerminalPanel } from './TerminalPanel';
 import { FileTree } from './FileTree';
+import { TerminalPanel } from './TerminalPanel';
 
 const { Content, Footer } = Layout;
 
@@ -16,11 +16,11 @@ export function WebContainerPanel() {
       <Layout>
         <Content>
           <Row style={{ height: '100%' }}>
-            <Col span={16}>
+            <Col span={16} style={{ height: '100%' }}>
               <CodeEditor filePath={filePath} />
             </Col>
 
-            <Col span={8}>
+            <Col span={8} style={{ height: '100%' }}>
               <BrowserPanel />
             </Col>
           </Row>

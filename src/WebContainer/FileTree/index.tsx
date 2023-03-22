@@ -1,10 +1,17 @@
-import { FileOutlined, FolderOutlined } from '@ant-design/icons';
-import { Button, Layout, Tree } from 'antd';
+import { FileOutlined, FolderOutlined, SyncOutlined } from '@ant-design/icons';
+import { Button, Card, Layout, Tree } from 'antd';
 import type { AntTreeNodeProps, DataNode } from 'antd/es/tree';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { WebContainerNP } from '../constants';
-import { createDir, createFile, readFileSystem, renameFile, rm } from '../core';
+import {
+  createDir,
+  createFile,
+  readFileSystem,
+  renameFile,
+  rm,
+  webcontainerInstancePromise,
+} from '../core';
 import { ContextMenu } from './ContextMenu';
 
 const { Sider } = Layout;
@@ -189,6 +196,22 @@ export function FileTree({ onSelectedFileChange }: IFileTreeProps) {
     return '';
   }
 
+  async function syncFileSystemToUI() {
+    const rsp = await readFileSystem();
+
+    setTreeData(rsp);
+  }
+
+  useEffect(() => {
+    async function sync() {
+      await webcontainerInstancePromise;
+
+      syncFileSystemToUI();
+    }
+
+    sync();
+  }, []);
+
   return (
     <Sider
       theme="light"
@@ -196,17 +219,28 @@ export function FileTree({ onSelectedFileChange }: IFileTreeProps) {
       width={350}
       style={{ maxHeight: '100%', overflow: 'scroll' }}
     >
-      <Button
-        type="primary"
-        style={{ width: '100%' }}
-        onClick={async () => {
-          const rsp = await readFileSystem();
-
-          setTreeData(rsp);
-        }}
+      <Card
+        style={{ height: '100%' }}
+        title="文件"
+        extra={
+          <>
+            <Button icon={<SyncOutlined />} onClick={syncFileSystemToUI} />
+            {/* <Button icon={<SaveOutlined />} onClick={saveFileSystemTree} /> */}
+          </>
+        }
       >
-        sync file system
-      </Button>
+        <Tree
+          showIcon
+          icon={({ isLeaf }: AntTreeNodeProps) =>
+            isLeaf ? <FileOutlined /> : <FolderOutlined />
+          }
+          treeData={treeData}
+          selectedKeys={[selectedKey]}
+          onSelect={([key]) => {
+            setSelectedKey(key as string);
+          }}
+        />
+      </Card>
 
       <ContextMenu
         anchorPoint={anchorPoint}
@@ -220,18 +254,6 @@ export function FileTree({ onSelectedFileChange }: IFileTreeProps) {
         isOpen={visible}
         onClose={() => setVisible(false)}
         onClick={handleCLick}
-      />
-
-      <Tree
-        showIcon
-        icon={({ isLeaf }: AntTreeNodeProps) =>
-          isLeaf ? <FileOutlined /> : <FolderOutlined />
-        }
-        treeData={treeData}
-        selectedKeys={[selectedKey]}
-        onSelect={([key]) => {
-          setSelectedKey(key as string);
-        }}
       />
     </Sider>
   );

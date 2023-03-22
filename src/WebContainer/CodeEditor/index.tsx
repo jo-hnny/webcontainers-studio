@@ -44,9 +44,7 @@ export function CodeEditor({ filePath }: ICodeEditorProps) {
 
   useEffect(() => {
     async function readFile2content() {
-      const file = await readFile(filePath);
-
-      const fileContent = new TextDecoder().decode(file);
+      const fileContent = await readFile(filePath);
 
       setContent(fileContent);
     }
